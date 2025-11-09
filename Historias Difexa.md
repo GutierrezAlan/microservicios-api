@@ -684,6 +684,67 @@ POST   /api/publications/{id}/restore
 9. El sistema debe permitir guardar combinaciones de filtros como "vistas personalizadas" para uso frecuente.  
 10. La búsqueda debe completarse en menos de 2 segundos para conjuntos de hasta 10,000 publicaciones.
 
+### **Rutas API**
+
+```
+GET /api/posts
+```
+Ruta principal para búsqueda y filtrado con los siguientes query parameters:
+- `q`: Búsqueda por texto libre (título, contenido, autor, comentarios)
+- `status`: Filtrar por estado (draft, publishing, scheduled, archived)
+- `type`: Filtrar por tipo de contenido (text, image, video, audio, multimedia)
+- `channels`: Array de IDs de canales
+- `media`: Array de IDs de medios
+- `author`: ID o nombre del autor
+- `created_from`: Fecha inicio para filtrar por creación
+- `created_to`: Fecha fin para filtrar por creación
+- `scheduled_from`: Fecha inicio para programación
+- `scheduled_to`: Fecha fin para programación
+- `published_from`: Fecha inicio de publicación
+- `published_to`: Fecha fin de publicación
+- `has_attachments`: Boolean para filtrar con/sin adjuntos
+- `needs_enrichment`: Boolean para filtrar con/sin enriquecimiento pendiente
+- `sort`: Campo para ordenar (created_at, updated_at, scheduled_at, title, status, author)
+- `order`: Dirección del ordenamiento (asc, desc)
+- `per_page`: Resultados por página (20, 50, 100)
+- `page`: Número de página
+
+```
+GET /api/posts/views
+```
+Obtener las vistas personalizadas guardadas del usuario
+
+```
+POST /api/posts/views
+```
+Guardar una nueva vista personalizada (combinación de filtros)
+- Body: Configuración de filtros a guardar
+
+```
+GET /api/posts/views/{id}
+```
+Obtener una vista personalizada específica
+
+```
+PUT /api/posts/views/{id}
+```
+Actualizar una vista personalizada existente
+
+```
+DELETE /api/posts/views/{id}
+```
+Eliminar una vista personalizada
+
+```
+GET /api/posts/stats
+```
+Obtener estadísticas de la búsqueda actual:
+- Total de resultados
+- Distribución por estado
+- Distribución por tipo
+- Distribución por canal
+- Tiempo de búsqueda
+
 ## **H11c: Gestión de archivos adjuntos (Gino Martin)** {#h11c:-gestión-de-archivos-adjuntos-(gino-martin)}
 
 **COMO** publicador **QUIERO** poder adjuntar, gestionar y eliminar archivos multimedia en mis publicaciones **PARA QUE** pueda enriquecer el contenido con imágenes, videos y otros recursos.
