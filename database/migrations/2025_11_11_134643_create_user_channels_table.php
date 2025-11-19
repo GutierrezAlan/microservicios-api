@@ -13,7 +13,7 @@ return new class extends Migration
             
             // Las dos llaves foráneas que conectamos
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('channel_id')->constrained()->onDelete('cascade');
+            $table->foreignId('channel_id')->constrained('channels')->onDelete('cascade');
             
             // Campos adicionales del pivot (información extra de la relación)
             $table->boolean('is_approved')->default(false);    // ¿Está aprobado el usuario?
@@ -23,6 +23,7 @@ return new class extends Migration
             
             // Un usuario solo puede estar una vez en cada canal
             $table->unique(['user_id', 'channel_id']);
+            // $table->primary(['user_id', 'channel_id']);
             
             // Índice para buscar usuarios aprobados de un canal
             $table->index(['channel_id', 'is_approved']);

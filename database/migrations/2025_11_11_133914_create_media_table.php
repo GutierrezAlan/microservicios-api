@@ -9,11 +9,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('media', function (Blueprint $table) {
+        Schema::create('medias', function (Blueprint $table) {
             $table->id();
             
             $table->string('name');                        // Nombre del medio
-            $table->enum('type', MediaType::values()); // Tipo de medio
+            $table->enum('type', MediaType::values());     // Tipo de medio
             $table->json('configuration')->nullable();     // Configuración específica (JSON)
             $table->text('semantic_context')->nullable();  // Contexto semántico para IA
             $table->string('url_webhook')->nullable();     // URL para notificaciones

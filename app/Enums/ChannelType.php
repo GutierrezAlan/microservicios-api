@@ -4,10 +4,10 @@ namespace App\Enums;
 
 enum ChannelType: string
 {
-    case DEPARTMENT = 'department';
-    case INSTITUTE = 'institute';
-    case SECRETARY = 'secretary';
-    case CENTER = 'center';
+    case DEPARTMENT = 'departamento';
+    case INSTITUTE = 'instituto';
+    case SECRETARY = 'secretaría';
+    case CENTER = 'centero';
 
       /**
      * Obtiene todos los valores como array para migraciones

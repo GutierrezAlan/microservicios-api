@@ -9,15 +9,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('post_channels', function (Blueprint $table) {
-            $table->id();
+    
             
-            $table->foreignId('post_id')->constrained()->onDelete('cascade');
-            $table->foreignId('channel_id')->constrained()->onDelete('cascade');
-            
+            $table->foreignId('post_id')->constrained('posts')->onDelete('cascade');
+            $table->foreignId('channel_id')->constrained('channels')->onDelete('cascade');
+          
             $table->timestamps();
             
             // Un post solo puede estar una vez en cada canal
-            $table->unique(['post_id', 'channel_id']);
+            // $table->unique(['post_id', 'channel_id']); 
+            $table->primary(['post_id', 'channel_id']);
+            
         });
     }
 

@@ -16,12 +16,12 @@ return new class extends Migration
             $table->string('name');                        // Nombre del canal
             $table->text('description')->nullable();       // Descripción opcional
             $table->enum('type', ChannelType::values());   // Tipo de canal
-            $table->boolean('is_active')->default(true);   // Canal activo/inactivo
-            
+            $table->text('semantic_context')->nullable();
+            // $table->boolean('is_active')->default(true);   // Canal activo/inactivo
             $table->timestamps();
             
             // Índice compuesto para filtrar por tipo y estado activo
-            $table->index(['type', 'is_active']);
+            // $table->index(['type', 'is_active']);
         });
     }
 

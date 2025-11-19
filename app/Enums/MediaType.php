@@ -4,7 +4,7 @@ namespace App\Enums;
 
 enum MediaType: string
 {
-    case PHISICAL_SCREEN = 'phisical_screen';
+    case PHYSICAL_SCREEN = 'physical_screen';
     case SOCIAL_MEDIA = 'social_media';
     case EDITORIAL_PLATFORM = 'editorial_platform';
 

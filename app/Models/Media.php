@@ -5,11 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\Post;
+use App\Models\Channel;
+
 use App\Enums\MediaType;
 
 class Media extends Model
 {
     use HasFactory;
+
+    protected $table = 'medias';  // importante : el plural es media y el singular medium
 
     protected $fillable = [
         'name',
@@ -24,6 +29,8 @@ class Media extends Model
         'type' => MediaType::class,
         'configuration' => 'array',        // JSON se convierte a array automáticamente
         'is_active' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // ================================
@@ -32,12 +39,12 @@ class Media extends Model
 
     public function posts(): BelongsToMany
     {
-        return $this->belongsToMany(Post::class, 'post_medias');
+        return $this->belongsToMany(Post::class, 'post_medias', 'media_id', 'post_id');
     }
 
     public function channels(): BelongsToMany
     {
-        return $this->belongsToMany(Channel::class, 'channel_medias');
+        return $this->belongsToMany(Channel::class, 'channel_medias', 'media_id', 'channel_id');
     }
 }
     // ================================

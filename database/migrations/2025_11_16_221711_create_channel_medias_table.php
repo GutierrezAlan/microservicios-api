@@ -8,20 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('post_medias', function (Blueprint $table) {
-  
+        Schema::create('channel_medias', function (Blueprint $table) {
+
             
-            $table->foreignId('post_id')->constrained()->onDelete('cascade');
+            $table->foreignId('channel_id')->constrained()->onDelete('cascade');
             $table->foreignId('media_id')->constrained('medias')->onDelete('cascade');
-            $table->primary(['post_id', 'media_id']);
+            $table->primary(['channel_id', 'media_id']);
+            
             $table->timestamps();
             
-            // $table->unique(['post_id', 'media_id']);
+            // $table->unique(['channel_id', 'media_id']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('post_medias');
+        Schema::dropIfExists('channel_medias');
     }
 };
