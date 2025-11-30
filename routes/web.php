@@ -1,37 +1,89 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UIDemoController;
+use App\Http\Controllers\UIEventController;
+use App\Http\Controllers\LogViewerController;
 use App\Http\Controllers\DocumentationController;
+use App\Http\Controllers\UploadController;
 
-Route::get('/', fn() => view('api-client'));
+// Servir archivos del storage mediante endpoint personalizado
+Route::get('/files/{path}', [UploadController::class, 'serveFile'])->where('path', '.*')->name('files.serve');
 
-// Ruta para previsualizar emails (solo para desarrollo)
-if (app()->environment('local')) {
-    Route::get('/email-preview/reset-password', function () {
-        $user = App\Models\User::first() ?? App\Models\User::factory()->make([
-            'name' => 'Usuario Demo',
-            'email' => 'demo@ejemplo.com'
+// Log viewer routes (MUST be before dynamic demo route)
+Route::prefix('logs')->group(function () {
+    Route::get('/', [LogViewerController::class, 'index'])->name('logs.index');
+    Route::get('/content', [LogViewerController::class, 'content'])->name('logs.content');
+    Route::get('/download', [LogViewerController::class, 'download'])->name('logs.download');
+    Route::post('/clear', [LogViewerController::class, 'clear'])->name('logs.clear');
+});
+
+// Demo route - Default landing demo
+Route::get('/', function () {
+    $reset = request()->query('reset', false);
+    return view('demo', [
+        'demo' => 'landing-demo',
+        'reset' => $reset
+    ]);
+});
+
+Route::get('/login', function () {
+    $reset = request()->query('reset', false);
+    return view('demo', [
+        'demo' => 'login',
+        'reset' => $reset
+    ]);
+})->name('login');
+
+Route::get('/email/verify/{id}/{hash}', function () {
+    $reset = request()->query('reset', false);
+    return view('demo', [
+        'demo' => 'email-verified',
+        'reset' => $reset
+    ]);
+})->middleware('signed')->name('verification.notice');
+
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+
+    Route::get('/admin/dashboard', function () {
+        $reset = request()->query('reset', false);
+        return view('demo', [
+            'demo' => 'admin-dashboard',
+            'reset' => $reset
         ]);
+    })->name('admin.dashboard');
 
-        $notification = new App\Notifications\ResetPasswordNotification('demo-token-123456');
+});
 
-        return $notification->toMail($user);
-    })->name('email.preview.reset');
-
-    Route::get('/email-preview/verify-email', function () {
-        $user = App\Models\User::first() ?? App\Models\User::factory()->make([
-            'name' => 'Usuario Demo',
-            'email' => 'demo@ejemplo.com'
+// Profile route - Usuario autenticado
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/profile', function () {
+        $reset = request()->query('reset', false);
+        return view('demo', [
+            'demo' => 'profile',
+            'reset' => $reset
         ]);
+    })->name('profile');
+});
 
-        $notification = new App\Notifications\CustomVerifyEmailNotification();
+// Demo route - Dynamic demo viewer
+Route::get('/demo/{demo}', function (string $demo) {
+    $reset = request()->query('reset', false);
+    return view('demo', [
+        'demo' => $demo,
+        'reset' => $reset
+    ]);
+})->name('demo');
 
-        return $notification->toMail($user);
-    })->name('email.preview.verify');
-}
+// Demo UI API routes - Unified controller for all demo services
+Route::get('/api/{demo}', [UIDemoController::class, 'show'])->name('api.demo');
 
-// Ruta para el cliente API
-// Route::get('/api-client', fn() => view('api-client'))->name('api-client');
+// UI Event Handler
+Route::post('/api/ui-event', [UIEventController::class, 'handleEvent'])->name('ui.event');
+
+// Upload temporal routes (para demos)
+Route::post('/api/upload/temporary', [UploadController::class, 'uploadTemporary'])->name('upload.temporary');
+Route::delete('/api/upload/temporary/{id}', [UploadController::class, 'deleteTemporary'])->name('upload.temporary.delete');
 
 // Rutas para documentación
 Route::prefix('docs')->group(function () {

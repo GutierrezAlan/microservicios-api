@@ -1,7 +1,9 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FileController;
+use App\Http\Controllers\Api\UserController;
 
 Route::get('/ping', fn() => response()->json([
     'success' => true,
@@ -9,23 +11,17 @@ Route::get('/ping', fn() => response()->json([
     'message' => 'API is running correctly'
 ]));
 
-// Endpoint de prueba para archivos (sin autenticación para testing)
-Route::post('/test-files', [FileController::class, 'upload']);
-Route::get('/test-files', [FileController::class, 'index']);
-Route::get('/test-files/download/{filename}', [FileController::class, 'download']);
-Route::delete('/test-files/{filename}', [FileController::class, 'delete']);
-
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register'])->name('api.register');
+Route::post('/login', [AuthController::class, 'login'])->name('api.login');
 
 // Rutas para reset de contraseña
-Route::post('/password/forgot', [AuthController::class, 'forgotPassword']);
-Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+Route::post('/password/forgot', [AuthController::class, 'forgotPassword'])->name('api.password.forgot');
+Route::post('/password/reset', [AuthController::class, 'resetPassword'])->name('api.password.reset');
 
-// Ruta para verificar email (no requiere autenticación)
+// Ruta para verificar email
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
-    ->middleware('signed')
     ->name('verification.verify');
+// TODO: ->middleware('signed'); DEBERIA ESTAR ACTIVADO
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -41,4 +37,59 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/download/{filename}', [FileController::class, 'download']);
         Route::delete('/{filename}', [FileController::class, 'delete']);
     });
+
+    // Ejemplo de ruta con permiso específico
+    Route::get('/admin/dashboard', function () {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Bienvenido al panel de administración',
+            'data' => [
+                'stats' => [
+                    'users' => 150,
+                    'posts' => 320,
+                    'comments' => 1240,
+                ]
+            ]
+        ]);
+    })->middleware('permission:access-admin-panel');
+
+    // Ejemplo de ruta para usuarios autenticados
+    Route::get('/user/profile', function () {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Perfil de usuario',
+            'data' => [
+                'profile' => [
+                    'bio' => 'Usuario activo del sistema',
+                    'posts_count' => 15,
+                    'followers' => 42,
+                ]
+            ]
+        ]);
+    });
 });
+
+
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::get('users/count', [UserController::class, 'count'])->name('users.count');
+    Route::apiResource('users', UserController::class);
+
+    // Rutas adicionales específicas si las necesitas
+    // Route::post('users/{user}/restore', [UserController::class, 'restore'])->name('users.restore');
+    // Route::delete('users/{user}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
+});
+
+/*
+ * Esto genera automáticamente las siguientes rutas (protegidas con Sanctum y rol admin):
+ * GET    /api/users           -> index   (Lista todos los usuarios)
+ * POST   /api/users           -> store   (Crea un nuevo usuario)
+ * GET    /api/users/{user}    -> show    (Muestra un usuario específico)
+ * PUT    /api/users/{user}    -> update  (Actualiza un usuario completo)
+ * PATCH  /api/users/{user}    -> update  (Actualiza parcialmente un usuario)
+ * DELETE /api/users/{user}    -> destroy (Elimina un usuario)
+ * GET    /api/users/count     -> count   (Cuenta el número total de usuarios)
+ *
+ * Todas las rutas requieren:
+ * - Autenticación mediante token de Sanctum
+ * - Rol de 'admin' (usando Spatie Permission)
+ */

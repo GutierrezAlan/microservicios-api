@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
 
-class CustomVerifyEmailNotification extends Notification
+class CustomVerifyEmailNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -19,7 +19,8 @@ class CustomVerifyEmailNotification extends Notification
      */
     public function __construct()
     {
-        //
+        // Set queue name for email notifications
+        $this->onQueue('emails');
     }
 
     /**
@@ -58,7 +59,7 @@ class CustomVerifyEmailNotification extends Notification
 
         // Crea la URL temporal firmada para la verificación
         $temporaryUrl = URL::temporarySignedRoute(
-            'verification.verify',
+            'verification.notice',
             Carbon::now()->addMinutes($expireMinutes),
             [
                 'id' => $notifiable->getKey(),
@@ -66,7 +67,8 @@ class CustomVerifyEmailNotification extends Notification
             ]
         );
         // Reemplaza la base de la URL por APP_URL
-        return preg_replace('/^https?:\/\/[^\/]+/', $appUrl, $temporaryUrl);
+        // return preg_replace('/^https?:\/\/[^\/]+/', $appUrl, $temporaryUrl);
+        return $temporaryUrl;
     }
 
     /**

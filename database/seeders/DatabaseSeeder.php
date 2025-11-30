@@ -2,14 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+<<<<<<< HEAD
         Role::firstOrCreate(['name' => 'admin']);
         Role::firstOrCreate(['name' => 'user']);
 
@@ -28,5 +27,11 @@ class DatabaseSeeder extends Seeder
         User::factory(10)->create()->each(function ($user) {
             $user->assignRole('user');
         });
+=======
+        $this->call([
+            RoleSeeder::class,
+            UserSeeder::class,
+        ]);
+>>>>>>> 20ab7d925bda222a85859dc1725baa9bb086913d
     }
 }
