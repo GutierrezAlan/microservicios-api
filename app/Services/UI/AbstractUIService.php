@@ -97,17 +97,8 @@ abstract class AbstractUIService
      */
     public function initializeEventContext(array $incomingStorage = [], array $queryParams = [], bool $debug = false): void
     {
-        \Log::info('🔧 [AbstractUIService] initializeEventContext() - Inicializando contexto', [
-            'service' => static::class,
-            'storage_keys' => array_keys($incomingStorage),
-        ]);
-        
         $this->container = $this->getUIContainer($debug);
         $this->oldUI = $this->container->toJson();
-        
-        \Log::info('📸 [AbstractUIService] oldUI capturado', [
-            'oldUI_keys' => array_keys($this->oldUI),
-        ]);
 
         $this->queryParams = $queryParams;
 
@@ -133,16 +124,11 @@ abstract class AbstractUIService
     public function injectStorageValues(array $incomingStorage): void
     {
         if (empty($incomingStorage)) {
-            \Log::info('⚠️ [AbstractUIService] injectStorageValues() - Storage vacío');
             return;
         }
-        
-        \Log::info('💾 [AbstractUIService] injectStorageValues() - Inyectando valores de storage', [
-            'incoming_storage' => $incomingStorage,
-        ]);
 
         $reflection = new ReflectionClass($this);
-        
+
         $injected = [];
 
         foreach ($reflection->getProperties(ReflectionProperty::IS_PROTECTED) as $property) {
@@ -167,14 +153,8 @@ abstract class AbstractUIService
 
             // Set the value
             $property->setValue($this, $value);
-            
+
             $injected[$propertyName] = $value;
-        }
-        
-        if (!empty($injected)) {
-            \Log::info('✅ [AbstractUIService] Storage inyectado en propiedades', [
-                'injected' => $injected,
-            ]);
         }
     }
 
@@ -192,8 +172,6 @@ abstract class AbstractUIService
      */
     private function injectComponentReferences(): void
     {
-        \Log::info('🔌 [AbstractUIService] injectComponentReferences() - Inyectando referencias de componentes');
-        
         $reflection = new ReflectionClass($this);
         $injected = [];
 
@@ -229,12 +207,6 @@ abstract class AbstractUIService
                 }
             }
         }
-        
-        if (!empty($injected)) {
-            \Log::info('✅ [AbstractUIService] Componentes inyectados en propiedades', [
-                'injected' => $injected,
-            ]);
-        }
     }
 
     /**
@@ -248,20 +220,13 @@ abstract class AbstractUIService
      */
     public function finalizeEventContext(bool $reload = false, bool $debug = false): void
     {
-        \Log::info('🏁 [AbstractUIService] finalizeEventContext() - Finalizando contexto', [
-            'reload' => $reload,
-        ]);
-        
+
         if ($reload) {
             $this->postLoadUI();
         }
 
         // Get current UI state
         $this->newUI = $this->container->toJson();
-        
-        \Log::info('📸 [AbstractUIService] newUI capturado', [
-            'newUI_keys' => array_keys($this->newUI),
-        ]);
 
         if (!$reload) {
             // Store updated UI
@@ -269,23 +234,7 @@ abstract class AbstractUIService
         }
 
         $diff = $this->buildDiffResponse($reload);
-        
-        \Log::info('🔍 [AbstractUIService] Diff calculado', [
-            'reload' => $reload,
-            'diff_keys' => array_keys($diff),
-            'diff' => $diff,
-        ]);
-        
-        $reloadMessage = $reload ? '🔄 RELOAD' : '📝 NO RELOAD';
-        $reloadedIds = implode(', ', array_keys($diff));
-        // UIDebug::debug("UI Diff Response ({$reloadMessage})", $reload ? $reloadedIds : $diff);
-
         $storageVariables = $this->getStorageVariables();
-        
-        \Log::info('💾 [AbstractUIService] Variables de storage extraídas', [
-            'storage' => $storageVariables,
-        ]);
-
         $this->uiChanges()->add($diff);
         $this->uiChanges()->setStorage($storageVariables);
     }
@@ -316,20 +265,20 @@ abstract class AbstractUIService
         return $result;
     }
 
-    /**
-     * Get the UI structure
-     *
-     * Returns the UI from cache or regenerates if not exists.
-     * This is the standard public method to retrieve UI for all services.
-     *
-     * @param mixed ...$params Optional parameters that can be used by child classes
-     * @return array UI structure in JSON format
-     */
-    public function getUI(string $parent = 'main', ...$params): array
-    {
-        $ui = $this->getStoredUI($parent, ...$params);
-        return $ui;
-    }
+    // /**
+    //  * Get the UI structure
+    //  *
+    //  * Returns the UI from cache or regenerates if not exists.
+    //  * This is the standard public method to retrieve UI for all services.
+    //  *
+    //  * @param mixed ...$params Optional parameters that can be used by child classes
+    //  * @return array UI structure in JSON format
+    //  */
+    // public function getUI(string $parent = 'main', ...$params): array
+    // {
+    //     $ui = $this->getStoredUI($parent, ...$params);
+    //     return $ui;
+    // }
 
     /**
      * Get stored UI state, regenerate if missing
@@ -458,6 +407,7 @@ abstract class AbstractUIService
             'tableheaderrow' => TableHeaderRowBuilder::class,
             'menudropdown' => MenuDropdownBuilder::class,
             'uploader' => UploaderBuilder::class,
+            'calendar' => \App\Services\UI\Components\CalendarBuilder::class,
             'default' => null,
         };
     }
